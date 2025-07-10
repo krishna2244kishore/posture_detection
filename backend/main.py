@@ -10,6 +10,7 @@ import numpy as np
 import mediapipe as mp
 import base64
 from flask_socketio import SocketIO, emit
+import logging
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'mp4', 'avi', 'mov', 'mkv', 'webm'}
@@ -191,6 +192,18 @@ def analyze_pose(filepath, mode='squat', sid=None):
         frame_idx += 1
     cap.release()
     return {'frames': frame_results, 'rep_count': rep_count}
+
+@app.before_request
+def log_request_info():
+    print(f"Request: {request.method} {request.url}")
+    print(f"Headers: {dict(request.headers)}")
+    print(f"Body: {request.get_data()}")
+
+@app.after_request
+def log_response_info(response):
+    print(f"Response status: {response.status}")
+    print(f"Response data: {response.get_data(as_text=True)}")
+    return response
 
 @app.route('/upload', methods=['POST'])
 def upload_video():
