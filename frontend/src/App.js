@@ -30,6 +30,7 @@ function App() {
   const [uploading, setUploading] = useState(false); // Track upload state
 
   const socket = io('http://localhost:5000'); // Connect to backend Socket.IO
+  const apiUrl = process.env.REACT_APP_API_URL;
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -57,15 +58,20 @@ function App() {
     console.log('Uploading file:', file);
     console.log('FormData:', [...formData.entries()]);
     try {
-      const response = await fetch('http://localhost:5000/upload', {
+      const response = await fetch(`${apiUrl}/upload`, {
         method: 'POST',
         body: formData,
       });
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || 'Upload failed');
+      let data;
+      const text = await response.text();
+      try {
+        data = JSON.parse(text);
+      } catch (e) {
+        throw new Error('Server returned invalid JSON or empty response.');
       }
-      const data = await response.json();
+      if (!response.ok) {
+        throw new Error((data && data.error) || 'Upload failed');
+      }
       setFeedback(data.results.frames);
       setRepCount(data.results.rep_count);
       setAnalysisDone(true);
@@ -184,7 +190,7 @@ function App() {
       canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
       const image = canvas.toDataURL('image/jpeg').split(',')[1];
       try {
-        const res = await fetch('http://localhost:5000/analyze_frame', {
+        const res = await fetch(`${apiUrl}/analyze_frame`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ image }),
