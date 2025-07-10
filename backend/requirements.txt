@@ -1,0 +1,7 @@
+Flask
+flask-cors
+flask-socketio
+mediapipe
+opencv-python
+numpy
+werkzeug 
