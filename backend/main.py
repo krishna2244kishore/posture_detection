@@ -1,9 +1,9 @@
 import eventlet
 eventlet.monkey_patch()
 
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import os
 from werkzeug.utils import secure_filename
 import cv2
 import numpy as np
